@@ -1,0 +1,30 @@
+{
+  "name": "openmusic-api",
+  "version": "1.0.0",
+  "description": "API for storing songs playlist using Hapi &amp; Postgres",
+  "main": "index.js",
+  "scripts": {
+    "start-prod": "node ./src/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AkmalPratama/openmusic-api.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AkmalPratama/openmusic-api/issues"
+  },
+  "homepage": "https://github.com/AkmalPratama/openmusic-api#readme",
+  "devDependencies": {
+    "eslint": "^8.11.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.25.4"
+  },
+  "dependencies": {
+    "@hapi/hapi": "^20.2.1",
+    "hapi": "^18.1.0"
+  }
+}
