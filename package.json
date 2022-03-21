@@ -4,7 +4,7 @@
   "description": "API for storing songs playlist using Hapi &amp; Postgres",
   "main": "index.js",
   "scripts": {
-    "start-prod": "node ./src/server.js",
+    "start-dev": "node ./src/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
