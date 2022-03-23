@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start-dev": "node ./src/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint ./src",
+    "migrate": "node-pg-migrate"
   },
   "repository": {
     "type": "git",
@@ -25,6 +27,11 @@
   },
   "dependencies": {
     "@hapi/hapi": "^20.2.1",
-    "hapi": "^18.1.0"
+    "dotenv": "^16.0.0",
+    "hapi": "^18.1.0",
+    "joi": "^17.6.0",
+    "nanoid": "^3.3.1",
+    "node-pg-migrate": "^6.2.1",
+    "pg": "^8.7.3"
   }
 }
