@@ -13,7 +13,7 @@ class UsersService {
   async addUser({
     username,
     password,
-    fullname
+    fullname,
   }) {
     await this.verifyUsername(username);
     const id = `user-${nanoid(16)}`;
@@ -51,7 +51,7 @@ class UsersService {
     if (!result.rows.length) {
       throw new AuthenticationError('Invalid credential');
     }
-    const { id, password: hashedPassword} = result.rows[0];
+    const { id, password: hashedPassword } = result.rows[0];
     const match = await bcrypt.compare(password, hashedPassword);
     if (!match) {
       throw new AuthenticationError('Invalid credential');

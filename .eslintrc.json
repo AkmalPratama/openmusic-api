@@ -12,9 +12,7 @@
     },
     "rules": {
         "no-underscore-dangle": "off",
-        "no-console": "off"
-    },
-    "linebreak-style": [
-        "error", "windows"
-    ]
+        "no-console": "off",
+        "linebreak-style": 0
+    }
 }

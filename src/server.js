@@ -43,7 +43,7 @@ const init = async () => {
   await server.register([
     {
       plugin: Jwt,
-    }
+    },
   ]);
 
   server.auth.strategy('openmusic_jwt', 'jwt', {
@@ -96,17 +96,17 @@ const init = async () => {
     {
       plugin: playlists,
       options: {
-        service: playlistsService,
-        songsService: songsService,
+        playlistsService,
+        songsService,
         validator: PlaylistsValidator,
       },
     },
     {
       plugin: collaborations,
       options: {
-        service: collaborationsService,
-        playlistsService: playlistsService,
-        usersService: usersService,
+        collaborationsService,
+        playlistsService,
+        usersService,
         validator: CollaborationsValidator,
       },
     },

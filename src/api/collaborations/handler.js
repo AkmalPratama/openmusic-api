@@ -1,14 +1,14 @@
 const ClientError = require('../../exceptions/ClientError');
 
 class CollaborationsHandler {
-  constructor(service, playlistsService, usersService, validator) {
-    this._service = service;
+  constructor(collaborationsService, playlistsService, usersService, validator) {
+    this._collaborationsService = collaborationsService;
     this._playlistsService = playlistsService;
     this._usersService = usersService;
     this._validator = validator;
 
     this.postCollaborationHandler = this.postCollaborationHandler.bind(this);
-    this.deleteCollaborationHandler = this.deleteCollaborationHandler.bind(this);       
+    this.deleteCollaborationHandler = this.deleteCollaborationHandler.bind(this);
   }
 
   async postCollaborationHandler(request, h) {
@@ -20,7 +20,8 @@ class CollaborationsHandler {
       await this._playlistsService.verifyPlaylistOwner(playlistId, credentialId);
       await this._usersService.getUserById(userId);
 
-      const collaborationId = await this._service.addCollaboration(playlistId, userId);
+      const collaborationId = await
+      this._collaborationsService.addCollaboration(playlistId, userId);
       const response = h.response({
         status: 'success',
         data: { collaborationId },
@@ -51,7 +52,7 @@ class CollaborationsHandler {
       const { playlistId, userId } = request.payload;
       const { id: credentialId } = request.auth.credentials;
       await this._playlistsService.verifyPlaylistOwner(playlistId, credentialId);
-      await this._service.deleteCollaboration(playlistId, userId);
+      await this._collaborationsService.deleteCollaboration(playlistId, userId);
       const response = h.response({
         status: 'success',
         message: 'Deleted collaborator successfully',
