@@ -1,14 +1,18 @@
 const ClientError = require('../../exceptions/ClientError');
 
 class AlbumsHandler {
-  constructor(service, validator) {
-    this._service = service;
+  constructor(albumsService, storageService, validator, uploadValidator) {
+    this._service = albumsService;
+    this._storageService = storageService;
     this._validator = validator;
+    this._uploadValidator = uploadValidator;
 
     this.postAlbumHandler = this.postAlbumHandler.bind(this);
     this.getAlbumByIdHandler = this.getAlbumByIdHandler.bind(this);
     this.putAlbumByIdHandler = this.putAlbumByIdHandler.bind(this);
     this.deleteAlbumByIdHandler = this.deleteAlbumByIdHandler.bind(this);
+
+    this.postAlbumCoverByIdHandler = this.postAlbumCoverByIdHandler.bind(this);
   }
 
   async postAlbumHandler(request, h) {
@@ -104,6 +108,42 @@ class AlbumsHandler {
         status: 'success',
         message: 'Album deleted successfully',
       };
+    } catch (e) {
+      if (e instanceof ClientError) {
+        const response = h.response({
+          status: 'fail',
+          message: e.message,
+        });
+        response.code(e.statusCode);
+        return response;
+      }
+      const response = h.response({
+        status: 'error',
+        message: 'Error on server',
+      });
+      response.code(500);
+
+      return response;
+    }
+  }
+
+  async postAlbumCoverByIdHandler(request, h) {
+    try {
+      const { cover } = request.payload;
+      const { id } = request.params;
+
+      this._uploadValidator.validateImageHeaders(cover.hapi.headers);
+
+      const filename = await this._storageService.writeFile(cover, cover.hapi);
+      const path = `http://${process.env.HOST}:${process.env.PORT}/albums/images/${filename}`;
+      await this._service.updateAlbumCover(id, path);
+
+      const response = h.response({
+        status: 'success',
+        message: 'Cover uploaded successfully',
+      });
+      response.code(201);
+      return response;
     } catch (e) {
       if (e instanceof ClientError) {
         const response = h.response({

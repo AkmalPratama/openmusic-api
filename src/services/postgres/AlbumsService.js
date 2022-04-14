@@ -2,6 +2,7 @@ const { Pool } = require('pg');
 const { nanoid } = require('nanoid');
 const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
+const { mapDBToModelAlbum } = require('../../utils');
 
 class AlbumsService {
   constructor() {
@@ -44,7 +45,7 @@ class AlbumsService {
       result.rows[0].songs = result2.rows;
     }
 
-    return result.rows[0];
+    return result.rows.map(mapDBToModelAlbum)[0];
   }
 
   async editAlbumById(id, { name, year }) {
@@ -68,6 +69,17 @@ class AlbumsService {
 
     if (!result.rows.length) {
       throw new NotFoundError('Fail to delete album. Id not found');
+    }
+  }
+
+  async updateAlbumCover(id, path) {
+    const q = {
+      text: 'UPDATE albums SET coverurl = $1 WHERE id = $2',
+      values: [path, id],
+    };
+    const result = await this._pool.query(q);
+    if (!result.rowCount) {
+      throw new NotFoundError('Fail to update cover album. Id not found');
     }
   }
 }
