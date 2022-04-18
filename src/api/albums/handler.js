@@ -1,9 +1,10 @@
 const ClientError = require('../../exceptions/ClientError');
 
 class AlbumsHandler {
-  constructor(albumsService, storageService, validator, uploadValidator) {
+  constructor(albumsService, storageService, likeService, validator, uploadValidator) {
     this._service = albumsService;
     this._storageService = storageService;
+    this._likeService = likeService;
     this._validator = validator;
     this._uploadValidator = uploadValidator;
 
@@ -13,6 +14,9 @@ class AlbumsHandler {
     this.deleteAlbumByIdHandler = this.deleteAlbumByIdHandler.bind(this);
 
     this.postAlbumCoverByIdHandler = this.postAlbumCoverByIdHandler.bind(this);
+
+    this.postAlbumLikeHandler = this.postAlbumLikeHandler.bind(this);
+    this.getAlbumLikeHandler = this.getAlbumLikeHandler.bind(this);
   }
 
   async postAlbumHandler(request, h) {
@@ -143,6 +147,74 @@ class AlbumsHandler {
         message: 'Cover uploaded successfully',
       });
       response.code(201);
+      return response;
+    } catch (e) {
+      if (e instanceof ClientError) {
+        const response = h.response({
+          status: 'fail',
+          message: e.message,
+        });
+        response.code(e.statusCode);
+        return response;
+      }
+      const response = h.response({
+        status: 'error',
+        message: 'Error on server',
+      });
+      response.code(500);
+
+      return response;
+    }
+  }
+
+  async postAlbumLikeHandler(request, h) {
+    try {
+      const { id } = request.params;
+      const { id: credentialId } = request.auth.credentials;
+
+      await this._service.getAlbumById(id);
+      await this._likeService.setAlbumLike(credentialId, id);
+
+      const response = h.response({
+        status: 'success',
+        message: 'Album liked successfully',
+      });
+      response.code(201);
+      return response;
+    } catch (e) {
+      if (e instanceof ClientError) {
+        const response = h.response({
+          status: 'fail',
+          message: e.message,
+        });
+        response.code(e.statusCode);
+        return response;
+      }
+      const response = h.response({
+        status: 'error',
+        message: 'Error on server',
+      });
+      response.code(500);
+
+      return response;
+    }
+  }
+
+  async getAlbumLikeHandler(request, h) {
+    try {
+      const { id } = request.params;
+      const { like, isCache } = await this._likeService.getAlbumLike(id);
+      const response = h.response({
+        status: 'success',
+        data: {
+          likes: like,
+        },
+      });
+      if (isCache) {
+        response.header('X-Data-Source', 'cache');
+      }
+      response.code(200);
+
       return response;
     } catch (e) {
       if (e instanceof ClientError) {
