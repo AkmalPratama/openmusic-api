@@ -22,12 +22,14 @@ const mapDBToModelAlbum = ({
   id,
   name,
   year,
-  coverurl
+  coverurl,
+  songs,
 }) => ({
   id,
   name,
   year,
   coverUrl: coverurl,
+  songs,
 });
 
 const filterSongTitle = (song, title) => (

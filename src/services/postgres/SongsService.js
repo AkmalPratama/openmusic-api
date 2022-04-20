@@ -5,8 +5,9 @@ const NotFoundError = require('../../exceptions/NotFoundError');
 const { filterSongTitle, filterSongPerformer, mapDBToModel } = require('../../utils');
 
 class SongsService {
-  constructor() {
+  constructor(cacheService) {
     this._pool = new Pool();
+    this._cacheService = cacheService;
   }
 
   async addSong({
@@ -45,17 +46,21 @@ class SongsService {
   }
 
   async getSongById(id) {
-    const q = {
-      text: 'SELECT * FROM songs WHERE id = $1',
-      values: [id],
-    };
-    const result = await this._pool.query(q);
-
-    if (!result.rows.length) {
-      throw new NotFoundError('Fail to find song');
+    try {
+      const result = await this._cacheService.get(`song:${id}`);
+      return { song: JSON.parse(result), isCache: true };
+    } catch (e) {
+      const q = {
+        text: 'SELECT * FROM songs WHERE id = $1',
+        values: [id],
+      };
+      const result = await this._pool.query(q);
+      if (!result.rows.length) {
+        throw new NotFoundError('Fail to find song');
+      }
+      await this._cacheService.set(`song:${id}`, JSON.stringify(result.rows.map(mapDBToModel)[0]));
+      return { song: result.rows.map(mapDBToModel)[0], isCache: false };
     }
-
-    return result.rows.map(mapDBToModel)[0];
   }
 
   async editSongById(id, {
@@ -75,6 +80,7 @@ class SongsService {
     if (!result.rows.length) {
       throw new NotFoundError('Fail to update song. Id not found');
     }
+    await this._cacheService.delete(`song:${id}`);
   }
 
   async deleteSongById(id) {
@@ -87,6 +93,7 @@ class SongsService {
     if (!result.rows.length) {
       throw new NotFoundError('Fail to delete song. Id not found');
     }
+    await this._cacheService.delete(`song:${id}`);
   }
 }
 

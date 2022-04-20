@@ -5,9 +5,8 @@ const NotFoundError = require('../../exceptions/NotFoundError');
 const { mapDBToModelAlbum } = require('../../utils');
 
 class AlbumsService {
-  constructor(cacheService) {
+  constructor() {
     this._pool = new Pool();
-    this._cacheService = cacheService;
   }
 
   async addAlbum({ name, year }) {
@@ -26,34 +25,27 @@ class AlbumsService {
   }
 
   async getAlbumById(id) {
-    try {
-      const result = await this._cacheService.get(`album:${id}`);
-      return { album: JSON.parse(result), isCache: true };
-    } catch (e) {
-      const q = {
-        text: 'SELECT * FROM albums WHERE id = $1',
-        values: [id],
-      };
-      const result = await this._pool.query(q);
+    const q = {
+      text: 'SELECT * FROM albums WHERE id = $1',
+      values: [id],
+    };
+    const result = await this._pool.query(q);
 
-      if (!result.rows.length) {
-        throw new NotFoundError('Fail to find album');
-      }
-
-      const q2 = {
-        text: 'SELECT id, title, performer FROM songs WHERE album_id = $1',
-        values: [id],
-      };
-      const result2 = await this._pool.query(q2);
-
-      if (result2.rows.length) {
-        result.rows[0].songs = result2.rows;
-      }
-
-      await this._cacheService.set(`album:${id}`, JSON.stringify(result.rows.map(mapDBToModelAlbum)[0]));
-
-      return { album: result.rows.map(mapDBToModelAlbum)[0], isCache: false };
+    if (!result.rows.length) {
+      throw new NotFoundError('Fail to find album');
     }
+
+    const q2 = {
+      text: 'SELECT id, title, performer FROM songs WHERE album_id = $1',
+      values: [id],
+    };
+    const result2 = await this._pool.query(q2);
+
+    if (result2.rows.length) {
+      result.rows[0].songs = result2.rows;
+    }
+
+    return result.rows.map(mapDBToModelAlbum)[0];
   }
 
   async editAlbumById(id, { name, year }) {
@@ -66,7 +58,6 @@ class AlbumsService {
     if (!result.rows.length) {
       throw new NotFoundError('Fail to update album. Id not found');
     }
-    await this._cacheService.delete(`album:${id}`);
   }
 
   async deleteAlbumById(id) {
@@ -79,7 +70,6 @@ class AlbumsService {
     if (!result.rows.length) {
       throw new NotFoundError('Fail to delete album. Id not found');
     }
-    await this._cacheService.delete(`album:${id}`);
   }
 
   async updateAlbumCover(id, path) {

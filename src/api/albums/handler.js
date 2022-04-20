@@ -51,14 +51,11 @@ class AlbumsHandler {
   async getAlbumByIdHandler(request, h) {
     try {
       const { id } = request.params;
-      const { album, isCache } = await this._service.getAlbumById(id);
+      const album = await this._service.getAlbumById(id);
       const response = h.response({
         status: 'success',
         data: { album },
       });
-      if (isCache) {
-        response.header('X-Data-Source', 'cache');
-      }
       return response;
     } catch (e) {
       if (e instanceof ClientError) {
